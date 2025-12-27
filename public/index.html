@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Reader</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h1>📚 Story Reader</h1>
+                <button class="close-sidebar" id="closeSidebar">✕</button>
+            </div>
+            
+            <div class="story-list" id="storyList">
+                <div class="loading">Loading stories...</div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <button class="menu-btn" id="menuBtn">☰</button>
+                <h2 id="currentStory">Select a story to read</h2>
+                <div class="header-actions">
+                    <button class="btn" id="prevChapter" disabled>← Previous</button>
+                    <button class="btn" id="nextChapter" disabled>Next →</button>
+                </div>
+            </header>
+            
+            <!-- Chapter List View -->
+            <div class="chapter-list-view" id="chapterListView">
+                <div class="welcome-message">
+                    <h3>Welcome to Story Reader</h3>
+                    <p>Select a story from the sidebar to start reading</p>
+                </div>
+            </div>
+            
+            <!-- Chapter Reading View -->
+            <div class="chapter-view hidden" id="chapterView">
+                <div class="chapter-header">
+                    <h3 id="chapterTitle"></h3>
+                    <div class="chapter-actions">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="markRead">
+                            <span>Mark as read</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="chapter-content" id="chapterContent"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+</body>
+</html>
+

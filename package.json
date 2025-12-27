@@ -1,0 +1,30 @@
+{
+  "name": "truyenfull-crawler",
+  "version": "1.0.0",
+  "description": "A tool to crawl story content from truyenfull.vision",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node index.js",
+    "crawl": "node index.js",
+    "read": "node reader.js",
+    "tts": "node tts.js",
+    "check": "node check.js",
+    "server": "node server.js"
+  },
+  "keywords": [
+    "crawler",
+    "scraper",
+    "truyenfull"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "1.0.0-rc.12",
+    "fs-extra": "^11.2.0",
+    "node-fetch": "^3.3.2",
+    "gtts": "^0.2.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "express": "^4.18.2"
+  }
+}

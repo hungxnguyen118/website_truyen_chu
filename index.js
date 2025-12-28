@@ -39,21 +39,21 @@ async function saveChapter(chapter, storySlug, outputDir, format = 'json') {
   const sanitizedSlug = sanitizeFileName(storySlug);
   const storyDir = path.join(outputDir, sanitizedSlug);
   const chaptersDir = path.join(storyDir, 'chapters');
-  
+
   await fs.ensureDir(chaptersDir);
-  
-  const chapterFileName = chapter.number 
+
+  const chapterFileName = chapter.number
     ? `chapter-${chapter.number.toString().padStart(5, '0')}.${format === 'txt' ? 'txt' : 'json'}`
     : `chapter-${chapter.order.toString().padStart(5, '0')}.${format === 'txt' ? 'txt' : 'json'}`;
   const chapterPath = path.join(chaptersDir, chapterFileName);
-  
+
   if (format === 'json') {
-    await fs.writeJSON(chapterPath, chapter, { spaces: 2, encoding: 'utf8' });
+    await fs.writeJSON(chapterPath, chapter, { encoding: 'utf8' });
   } else {
     const textContent = `${chapter.title}\n\n${chapter.content.text}`;
     await fs.writeFile(chapterPath, textContent, 'utf8');
   }
-  
+
   return { storySlug: sanitizedSlug, chapterPath };
 }
 
@@ -64,7 +64,7 @@ async function updateStoryJson(storyInfo, allChapters, outputDir) {
   const storySlug = sanitizeFileName(storyInfo.slug);
   const storyDir = path.join(outputDir, storySlug);
   const jsonPath = path.join(storyDir, 'story.json');
-  
+
   // Sort chapters by number
   const sortedChapters = [...allChapters].sort((a, b) => {
     if (a.number !== null && b.number !== null) {
@@ -74,13 +74,19 @@ async function updateStoryJson(storyInfo, allChapters, outputDir) {
     if (b.number !== null) return 1;
     return (a.order || 0) - (b.order || 0);
   });
-  
+
+  // Create lightweight chapters (exclude content to reduce file size)
+  const lightweightChapters = sortedChapters.map(chapter => {
+    const { content, ...metadata } = chapter;
+    return metadata;
+  });
+
   const data = {
     storyInfo,
-    chapters: sortedChapters
+    chapters: lightweightChapters
   };
-  
-  await fs.writeJSON(jsonPath, data, { spaces: 2, encoding: 'utf8' });
+
+  await fs.writeJSON(jsonPath, data, { encoding: 'utf8' });
 }
 
 /**
@@ -90,16 +96,16 @@ async function chapterExists(chapter, storySlug, outputDir, format = 'json') {
   const sanitizedSlug = sanitizeFileName(storySlug);
   const storyDir = path.join(outputDir, sanitizedSlug);
   const chaptersDir = path.join(storyDir, 'chapters');
-  
+
   if (!await fs.pathExists(chaptersDir)) {
     return false;
   }
-  
-  const chapterFileName = chapter.number 
+
+  const chapterFileName = chapter.number
     ? `chapter-${chapter.number.toString().padStart(5, '0')}.${format === 'txt' ? 'txt' : 'json'}`
     : `chapter-${chapter.order.toString().padStart(5, '0')}.${format === 'txt' ? 'txt' : 'json'}`;
   const chapterPath = path.join(chaptersDir, chapterFileName);
-  
+
   return await fs.pathExists(chapterPath);
 }
 
@@ -109,14 +115,14 @@ async function chapterExists(chapter, storySlug, outputDir, format = 'json') {
 async function getExistingChapters(storySlug, outputDir, format = 'json') {
   const storyDir = path.join(outputDir, storySlug);
   const chaptersDir = path.join(storyDir, 'chapters');
-  
+
   if (!await fs.pathExists(chaptersDir)) {
     return new Set();
   }
-  
+
   const files = await fs.readdir(chaptersDir);
   const existingChapters = new Set();
-  
+
   for (const file of files) {
     if (file.endsWith(format === 'txt' ? '.txt' : '.json')) {
       // Extract chapter number from filename
@@ -126,7 +132,7 @@ async function getExistingChapters(storySlug, outputDir, format = 'json') {
       }
     }
   }
-  
+
   return existingChapters;
 }
 
@@ -137,9 +143,9 @@ async function saveStoryInfo(storyInfo, outputDir) {
   const storySlug = sanitizeFileName(storyInfo.slug);
   const storyDir = path.join(outputDir, storySlug);
   await fs.ensureDir(storyDir);
-  
+
   const infoPath = path.join(storyDir, 'info.json');
-  await fs.writeJSON(infoPath, storyInfo, { spaces: 2, encoding: 'utf8' });
+  await fs.writeJSON(infoPath, storyInfo, { encoding: 'utf8' });
 }
 
 async function main() {
@@ -148,14 +154,14 @@ async function main() {
     printUsage();
     process.exit(0);
   }
-  
+
   const storyUrl = args[0];
   if (!storyUrl || !storyUrl.startsWith('http')) {
     console.error('Error: Please provide a valid story URL');
     printUsage();
     process.exit(1);
   }
-  
+
   // Parse options
   const options = {
     outputDir: './output',
@@ -166,7 +172,7 @@ async function main() {
     resume: true,  // Default to resume mode (skip existing chapters)
     force: false
   };
-  
+
   for (let i = 1; i < args.length; i++) {
     const arg = args[i];
     if (arg === '--output-dir' && args[i + 1]) {
@@ -192,14 +198,14 @@ async function main() {
       options.resume = false;  // Force mode disables resume
     }
   }
-  
+
   // Create crawler instance
   const crawler = new TruyenFullCrawler({
     delay: options.delay,
     retries: 3,
     timeout: 30000
   });
-  
+
   try {
     console.log(`\n=== TruyenFull Crawler ===\n`);
     console.log(`Story URL: ${storyUrl}`);
@@ -215,15 +221,15 @@ async function main() {
       console.log(`Resume mode: ON (will skip existing chapters by default)`);
     }
     console.log();
-    
+
     // Get story info first
     const storyInfo = await crawler.getStoryInfo(storyUrl);
     await saveStoryInfo(storyInfo, options.outputDir);
-    
+
     // Always check for existing chapters (unless force mode)
     let existingChapters = new Set();
     const allCrawledChapters = [];
-    
+
     if (!options.force) {
       existingChapters = await getExistingChapters(storyInfo.slug, options.outputDir, options.format);
       if (existingChapters.size > 0) {
@@ -232,7 +238,7 @@ async function main() {
         } else {
           console.log(`Found ${existingChapters.size} existing chapters. Use --resume to skip them, or --force to re-crawl.`);
         }
-        
+
         // Load existing chapters into allCrawledChapters for complete story.json
         const storyDir = path.join(options.outputDir, storyInfo.slug);
         const chaptersDir = path.join(storyDir, 'chapters');
@@ -241,7 +247,7 @@ async function main() {
           const chapterFiles = files
             .filter(f => f.endsWith(options.format === 'txt' ? '.txt' : '.json'))
             .sort();
-          
+
           for (const file of chapterFiles) {
             const filePath = path.join(chaptersDir, file);
             if (options.format === 'json') {
@@ -254,7 +260,7 @@ async function main() {
               }
             }
           }
-          
+
           if (allCrawledChapters.length > 0) {
             console.log(`Loaded ${allCrawledChapters.length} existing chapters into memory.`);
           }
@@ -264,10 +270,10 @@ async function main() {
     } else {
       console.log(`Force mode: Will re-crawl all chapters even if they exist.\n`);
     }
-    
+
     let savedCount = 0;
     let skippedCount = 0;
-    
+
     // Progress callback with incremental saving
     const onChapterCrawled = async (chapter) => {
       // Check if chapter exists and should be skipped
@@ -283,13 +289,13 @@ async function main() {
         await updateStoryJson(storyInfo, allCrawledChapters, options.outputDir);
         return;
       }
-      
+
       // Save chapter immediately
       try {
         await saveChapter(chapter, storyInfo.slug, options.outputDir, options.format);
         savedCount++;
         console.log(`  ✓ Saved: Chapter ${chapter.number || 'N/A'} - ${chapter.title}`);
-        
+
         // Update story.json incrementally
         allCrawledChapters.push(chapter);
         await updateStoryJson(storyInfo, allCrawledChapters, options.outputDir);
@@ -297,13 +303,13 @@ async function main() {
         console.error(`  ✗ Error saving chapter: ${error.message}`);
       }
     };
-    
+
     // Progress callback
     const onProgress = ({ current, total, chapter }) => {
       const percentage = ((current / total) * 100).toFixed(1);
       process.stdout.write(`\rProgress: ${current}/${total} (${percentage}%) - ${chapter.title}`);
     };
-    
+
     // Crawl the story
     const result = await crawler.crawlStory(storyUrl, {
       startChapter: options.startChapter,
@@ -312,20 +318,20 @@ async function main() {
       onChapterCrawled,
       existingChapters: !options.force ? existingChapters : null
     });
-    
+
     console.log('\n\nCrawling completed!');
     console.log(`Total chapters crawled: ${result.chapters.length}`);
     console.log(`Chapters saved: ${savedCount}`);
-    
+
     // Get final count of skipped chapters
     const finalExistingChapters = await getExistingChapters(storyInfo.slug, options.outputDir, options.format);
     const totalChapters = result.chapters.length + (finalExistingChapters.size - allCrawledChapters.length);
     const totalSkipped = finalExistingChapters.size - savedCount;
-    
+
     if (totalSkipped > 0) {
       console.log(`Chapters skipped (already existed): ${totalSkipped}`);
     }
-    
+
     console.log('\nDone!');
   } catch (error) {
     console.error('\nError:', error.message);

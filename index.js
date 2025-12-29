@@ -310,12 +310,24 @@ async function main() {
       process.stdout.write(`\rProgress: ${current}/${total} (${percentage}%) - ${chapter.title}`);
     };
 
+    // Error logging callback
+    const onError = async (errorInfo) => {
+      const storyDir = path.join(options.outputDir, storyInfo.slug);
+      const errorLogPath = path.join(storyDir, 'errors.log');
+
+      const logEntry = `[${errorInfo.timestamp}] Chapter ${errorInfo.chapter.number || 'N/A'} - ${errorInfo.chapter.title}: ${errorInfo.error}\n`;
+
+      await fs.ensureDir(storyDir);
+      await fs.appendFile(errorLogPath, logEntry, 'utf8');
+    };
+
     // Crawl the story
     const result = await crawler.crawlStory(storyUrl, {
       startChapter: options.startChapter,
       endChapter: options.endChapter,
       onProgress,
       onChapterCrawled,
+      onError,
       existingChapters: !options.force ? existingChapters : null
     });
 

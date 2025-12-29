@@ -136,6 +136,90 @@ This will show:
 - Missing chapters (gaps)
 - Chapter details
 
+## Error Recovery & Missing Chapters
+
+The crawler includes tools to detect and recover missing chapters that failed during the initial crawl.
+
+### Detect Missing Chapters
+
+Scan all stories to find missing chapters (gaps in the sequence):
+
+```bash
+node detect_missing.js
+```
+
+This will:
+- Check all stories in the `output/` directory
+- Compare expected chapters (1 to max) with actual downloaded files
+- Generate a report showing missing chapters for each story
+- Save the report to `output/missing_chapters_report.json`
+
+Example output:
+```
+📁 the-gioi-hoan-my:
+   Expected: 2015 chapters (1-2015)
+   Found: 2006 chapters
+   Missing: 9 chapters
+   Missing numbers: 118, 119, 120, 121, 123, 143, 294, 297, 636
+```
+
+### Retry Failed Chapters
+
+After detecting missing chapters, you can retry downloading them:
+
+**Retry all stories automatically:**
+```bash
+node retry_failed.js all
+```
+
+**Retry a specific story (URL auto-detected from story.json):**
+```bash
+node retry_failed.js <story-name>
+```
+
+**Retry a specific story with manual URL:**
+```bash
+node retry_failed.js <story-name> <story-url>
+```
+
+Examples:
+```bash
+# Retry all stories with missing chapters
+node retry_failed.js all
+
+# Retry specific story (URL detected automatically)
+node retry_failed.js the-gioi-hoan-my
+
+# Retry specific story with manual URL
+node retry_failed.js the-gioi-hoan-my https://truyenfull.vision/the-gioi-hoan-my
+```
+
+This will:
+- Read the missing chapters from `missing_chapters_report.json`
+- Automatically detect story URLs from `story.json` (no manual URL needed!)
+- Attempt to download each missing chapter
+- Save the chapter files to `chapters/` directory
+- Update `story.json` with the new chapter metadata
+- Remove successfully retried stories from the report
+- Clean up error logs if all chapters succeed
+- Log any failures to `retry_errors.log`
+
+**Features:**
+- ✅ **Retry all stories at once** with `node retry_failed.js all`
+- ✅ **Automatic URL detection** from `story.json` (no manual URL needed)
+- ✅ Automatically constructs chapter URLs for missing chapters
+- ✅ Updates `story.json` after successful downloads
+- ✅ Removes stories from report after successful retry
+- ✅ Cleans up error logs when all chapters succeed
+- ✅ Logs errors for chapters that still fail
+- ✅ Shows progress for each chapter
+
+**Workflow:**
+1. Run `detect_missing.js` to find missing chapters
+2. Review the report in `output/missing_chapters_report.json`
+3. Run `retry_failed.js all` to retry all stories, or specify a story name
+4. Check `retry_errors.log` if any chapters still fail
+
 ## Reading Output Files
 
 After crawling, you can read the output files using the included reader tool:

@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Story Reader</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/style.css">
+    <link rel="stylesheet" href="/sidebar.css">
 </head>
+
 <body>
     <div class="container">
         <!-- Sidebar -->
@@ -14,12 +17,12 @@
                 <h1>📚 Story Reader</h1>
                 <button class="close-sidebar" id="closeSidebar">✕</button>
             </div>
-            
+
             <div class="story-list" id="storyList">
                 <div class="loading">Loading stories...</div>
             </div>
         </div>
-        
+
         <!-- Main Content -->
         <div class="main-content">
             <!-- Header -->
@@ -31,7 +34,7 @@
                     <button class="btn" id="nextChapter" disabled>Next →</button>
                 </div>
             </header>
-            
+
             <!-- Chapter List View -->
             <div class="chapter-list-view" id="chapterListView">
                 <div class="welcome-message">
@@ -39,7 +42,7 @@
                     <p>Select a story from the sidebar to start reading</p>
                 </div>
             </div>
-            
+
             <!-- Chapter Reading View -->
             <div class="chapter-view hidden" id="chapterView">
                 <div class="chapter-header">
@@ -55,8 +58,8 @@
             </div>
         </div>
     </div>
-    
-    <script src="app.js"></script>
-</body>
-</html>
 
+    <script src="/app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,77 @@
+/* Sidebar Styles */
+.category-item {
+    margin-bottom: 5px;
+}
+
+.category-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #2c3e50;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.category-header:hover {
+    background-color: #34495e;
+}
+
+.category-toggle {
+    margin-right: 10px;
+    font-size: 10px;
+    width: 15px;
+    text-align: center;
+}
+
+.category-title {
+    flex: 1;
+}
+
+.category-count {
+    font-size: 0.85em;
+    opacity: 0.7;
+}
+
+.category-stories {
+    display: none;
+    padding-left: 10px;
+    margin-top: 5px;
+}
+
+.category-item.expanded .category-stories {
+    display: block;
+}
+
+.story-item {
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-left: 3px solid transparent;
+    margin-left: 5px;
+    /* Indent stories slightly */
+}
+
+/* Override existing story-item styles if necessary */
+.story-item:hover {
+    background-color: #f8f9fa;
+    color: #2c3e50;
+    /* Dark text for light background */
+}
+
+.story-item.active {
+    background-color: #e8f4fd;
+    border-left-color: #3498db;
+    color: #2c3e50;
+    /* Dark text for light background */
+}
+
+.empty-category {
+    padding: 10px 15px;
+    color: #999;
+    font-style: italic;
+    font-size: 0.9em;
+}

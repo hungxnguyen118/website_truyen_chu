@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "title": "Tiên Hiệp",
+        "alias": "tien-hiep",
+        "order": 1,
+        "category_parent_id": null
+    },
+    {
+        "id": 2,
+        "title": "Xuyên Không",
+        "alias": "xuyen-khong",
+        "order": 2,
+        "category_parent_id": null
+    }
+]

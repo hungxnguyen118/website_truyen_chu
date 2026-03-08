@@ -18,7 +18,7 @@ function updateURL(story, chapterNumber = null) {
 
 function parseURL() {
     const path = window.location.pathname;
-    
+
     // Format: /story/<slug>/chapter/<number>
     const match = path.match(/\/story\/([^/]+)(?:\/chapter\/(\d+))?/);
     if (match) {
@@ -33,6 +33,11 @@ function parseURL() {
 // API functions
 async function fetchStories() {
     const response = await fetch('/api/stories');
+    return await response.json();
+}
+
+async function fetchCategories() {
+    const response = await fetch('/api/categories');
     return await response.json();
 }
 
@@ -60,37 +65,73 @@ async function loadProgress(slug) {
 }
 
 // UI functions
-function renderStories(stories) {
+function renderSidebar(categories, stories) {
     const storyList = document.getElementById('storyList');
-    
-    if (stories.length === 0) {
-        storyList.innerHTML = '<div class="loading">No stories found. Crawl some stories first!</div>';
+
+    if (categories.length === 0) {
+        storyList.innerHTML = '<div class="loading">No categories found.</div>';
         return;
     }
-    
-    storyList.innerHTML = stories.map(story => `
-        <div class="story-item" data-slug="${story.slug}">
-            <div class="story-title">${story.title}</div>
-            <div class="story-meta">${story.chapterCount} chapters</div>
+
+    // Sort categories by order
+    categories.sort((a, b) => a.order - b.order);
+
+    storyList.innerHTML = categories.map(category => {
+        // Filter stories for this category
+        const categoryStories = stories.filter(story => story.categoryId === category.id);
+
+        return `
+        <div class="category-item expanded" data-id="${category.id}">
+            <div class="category-header">
+                <span class="category-toggle">▼</span>
+                <span class="category-title">${category.title}</span>
+                <span class="category-count">(${categoryStories.length})</span>
+            </div>
+            <div class="category-stories">
+                ${categoryStories.length > 0 ? categoryStories.map(story => `
+                    <div class="story-item" data-slug="${story.slug}">
+                        <div class="story-title">${story.title}</div>
+                        <div class="story-meta">${story.chapterCount} chapters</div>
+                    </div>
+                `).join('') : '<div class="empty-category">No stories</div>'}
+            </div>
         </div>
-    `).join('');
-    
-    // Add click handlers
+        `;
+    }).join('');
+
+    // Add click handlers for categories (toggle expand/collapse)
+    document.querySelectorAll('.category-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const categoryItem = header.parentElement;
+            categoryItem.classList.toggle('expanded');
+            const toggle = header.querySelector('.category-toggle');
+            toggle.textContent = categoryItem.classList.contains('expanded') ? '▼' : '▶';
+        });
+    });
+
+    // Add click handlers for stories
     document.querySelectorAll('.story-item').forEach(item => {
-        item.addEventListener('click', () => {
+        item.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent toggling category
             const slug = item.dataset.slug;
             loadStory(slug);
             document.querySelectorAll('.story-item').forEach(i => i.classList.remove('active'));
             item.classList.add('active');
         });
     });
-    
+
     // Check URL and restore state
     const urlState = parseURL();
     if (urlState) {
         const storyItem = document.querySelector(`[data-slug="${urlState.story}"]`);
         if (storyItem) {
             storyItem.classList.add('active');
+            // Ensure parent category is expanded (it is by default, but just in case logic changes)
+            const categoryItem = storyItem.closest('.category-item');
+            if (categoryItem && !categoryItem.classList.contains('expanded')) {
+                categoryItem.classList.add('expanded');
+                categoryItem.querySelector('.category-toggle').textContent = '▼';
+            }
             loadStory(urlState.story, urlState.chapterNumber);
         }
     }
@@ -99,24 +140,24 @@ function renderStories(stories) {
 async function loadStory(slug, chapterNumber = null) {
     currentStory = slug;
     document.getElementById('currentStory').textContent = 'Loading...';
-    
+
     // Load chapters and progress
     const [chapters, progress] = await Promise.all([
         fetchChapters(slug),
         loadProgress(slug)
     ]);
-    
+
     currentChapters = chapters;
     readingProgress = progress.chapters || {};
-    
+
     // Update UI
     const storyInfo = await fetchStories();
     const story = storyInfo.find(s => s.slug === slug);
     document.getElementById('currentStory').textContent = story ? story.title : slug;
-    
+
     // Update URL
     updateURL(slug, chapterNumber);
-    
+
     // If chapter number is specified, find and load that chapter
     if (chapterNumber !== null && chapterNumber > 0) {
         const chapterIndex = chapters.findIndex(ch => ch.number === chapterNumber);
@@ -133,19 +174,19 @@ async function loadStory(slug, chapterNumber = null) {
 function showChapterList() {
     document.getElementById('chapterListView').classList.remove('hidden');
     document.getElementById('chapterView').classList.add('hidden');
-    
+
     const chapterList = document.getElementById('chapterListView');
     const welcome = chapterList.querySelector('.welcome-message');
-    
+
     if (welcome) {
         welcome.remove();
     }
-    
+
     chapterList.innerHTML = `
         <h3>Chapters (${currentChapters.length})</h3>
         <div class="chapter-grid" id="chapterGrid"></div>
     `;
-    
+
     const grid = document.getElementById('chapterGrid');
     grid.innerHTML = currentChapters.map((chapter, index) => {
         const isRead = readingProgress[chapter.number]?.read || false;
@@ -156,7 +197,7 @@ function showChapterList() {
             </div>
         `;
     }).join('');
-    
+
     // Add click handlers
     document.querySelectorAll('.chapter-card').forEach(card => {
         card.addEventListener('click', () => {
@@ -168,29 +209,29 @@ function showChapterList() {
 
 async function loadChapter(index, chapterNumber = null) {
     if (index < 0 || index >= currentChapters.length) return;
-    
+
     currentChapterIndex = index;
     const chapter = currentChapters[index];
     const chNumber = chapterNumber || chapter.number;
-    
+
     // Update URL with chapter number (not index)
     updateURL(currentStory, chNumber);
-    
+
     // Show chapter view
     document.getElementById('chapterListView').classList.add('hidden');
     document.getElementById('chapterView').classList.remove('hidden');
-    
+
     // Update header
     document.getElementById('chapterTitle').textContent = `Chapter ${chapter.number || 'N/A'}: ${chapter.title}`;
-    
+
     // Update navigation buttons
     document.getElementById('prevChapter').disabled = index === 0;
     document.getElementById('nextChapter').disabled = index === currentChapters.length - 1;
-    
+
     // Show loading spinner
     document.getElementById('chapterContent').innerHTML = '<div class="loading-spinner"><div class="spinner"></div><p>Loading chapter...</p></div>';
     const chapterData = await fetchChapter(currentStory, chapter.filename);
-    
+
     // Display HTML content
     if (chapterData.content.html) {
         document.getElementById('chapterContent').innerHTML = chapterData.content.html;
@@ -198,11 +239,11 @@ async function loadChapter(index, chapterNumber = null) {
         // Fallback to text if HTML not available
         document.getElementById('chapterContent').textContent = chapterData.content.text;
     }
-    
+
     // Update read checkbox
     const isRead = readingProgress[chapter.number]?.read || false;
     document.getElementById('markRead').checked = isRead;
-    
+
     // Scroll to top
     document.querySelector('.chapter-view').scrollTop = 0;
 }
@@ -230,18 +271,18 @@ document.getElementById('nextChapter').addEventListener('click', () => {
 
 document.getElementById('markRead').addEventListener('change', async (e) => {
     if (!currentStory || currentChapterIndex < 0) return;
-    
+
     const chapter = currentChapters[currentChapterIndex];
     const isRead = e.target.checked;
-    
+
     await saveProgress(currentStory, chapter.number, isRead);
-    
+
     // Update progress
     if (!readingProgress[chapter.number]) {
         readingProgress[chapter.number] = {};
     }
     readingProgress[chapter.number].read = isRead;
-    
+
     // Update chapter list if visible
     if (!document.getElementById('chapterListView').classList.contains('hidden')) {
         showChapterList();
@@ -251,7 +292,7 @@ document.getElementById('markRead').addEventListener('change', async (e) => {
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
     if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
-    
+
     if (e.key === 'ArrowLeft' && !document.getElementById('prevChapter').disabled) {
         document.getElementById('prevChapter').click();
     } else if (e.key === 'ArrowRight' && !document.getElementById('nextChapter').disabled) {
@@ -276,13 +317,16 @@ window.addEventListener('popstate', (e) => {
 
 // Initialize
 async function init() {
-    const stories = await fetchStories();
-    renderStories(stories);
-    
+    const [categories, stories] = await Promise.all([
+        fetchCategories(),
+        fetchStories()
+    ]);
+    renderSidebar(categories, stories);
+
     // Check if URL has state to restore
     const urlState = parseURL();
     if (urlState && stories.find(s => s.slug === urlState.story)) {
-        // URL state will be handled by renderStories after stories are loaded
+        // URL state will be handled by renderSidebar after stories are loaded
     }
 }
 

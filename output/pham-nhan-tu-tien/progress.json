@@ -1,1 +1,114 @@
-{"chapters":{"790":{"read":false,"timestamp":"2025-12-27T14:12:03.651Z"}},"lastReadChapter":790,"lastReadTime":"2025-12-27T14:11:50.556Z"}
+{
+  "chapters": {
+    "790": {
+      "read": true,
+      "timestamp": "2025-12-29T11:42:50.795Z"
+    },
+    "791": {
+      "read": true,
+      "timestamp": "2025-12-29T11:42:48.530Z"
+    },
+    "792": {
+      "read": true,
+      "timestamp": "2026-01-01T12:33:33.125Z"
+    },
+    "793": {
+      "read": true,
+      "timestamp": "2026-03-03T14:38:04.116Z"
+    },
+    "794": {
+      "read": true,
+      "timestamp": "2026-03-03T14:46:21.403Z"
+    },
+    "795": {
+      "read": true,
+      "timestamp": "2026-03-03T14:53:24.156Z"
+    },
+    "796": {
+      "read": true,
+      "timestamp": "2026-03-03T15:01:19.643Z"
+    },
+    "797": {
+      "read": true,
+      "timestamp": "2026-03-03T15:09:11.488Z"
+    },
+    "798": {
+      "read": true,
+      "timestamp": "2026-03-03T15:16:48.187Z"
+    },
+    "799": {
+      "read": true,
+      "timestamp": "2026-03-03T15:27:11.357Z"
+    },
+    "800": {
+      "read": true,
+      "timestamp": "2026-03-03T15:35:30.081Z"
+    },
+    "801": {
+      "read": true,
+      "timestamp": "2026-03-03T15:45:03.169Z"
+    },
+    "802": {
+      "read": true,
+      "timestamp": "2026-03-03T15:53:58.793Z"
+    },
+    "803": {
+      "read": true,
+      "timestamp": "2026-03-07T13:02:01.748Z"
+    },
+    "805": {
+      "read": true,
+      "timestamp": "2026-03-07T13:24:56.263Z"
+    },
+    "806": {
+      "read": true,
+      "timestamp": "2026-03-07T13:32:53.552Z"
+    },
+    "807": {
+      "read": true,
+      "timestamp": "2026-03-07T13:39:27.845Z"
+    },
+    "808": {
+      "read": true,
+      "timestamp": "2026-03-07T13:46:15.657Z"
+    },
+    "809": {
+      "read": true,
+      "timestamp": "2026-03-07T13:52:18.023Z"
+    },
+    "810": {
+      "read": true,
+      "timestamp": "2026-03-07T13:58:58.959Z"
+    },
+    "811": {
+      "read": true,
+      "timestamp": "2026-03-07T14:05:59.127Z"
+    },
+    "812": {
+      "read": true,
+      "timestamp": "2026-03-07T14:12:52.533Z"
+    },
+    "813": {
+      "read": true,
+      "timestamp": "2026-03-07T14:19:37.960Z"
+    },
+    "814": {
+      "read": true,
+      "timestamp": "2026-03-07T14:26:30.253Z"
+    },
+    "815": {
+      "read": true,
+      "timestamp": "2026-03-07T14:33:18.059Z"
+    },
+    "816": {
+      "read": true,
+      "timestamp": "2026-03-07T14:37:31.543Z"
+    },
+    "817": {
+      "read": true,
+      "timestamp": "2026-03-07T14:46:25.989Z"
+    }
+  },
+  "lastReadChapter": 817,
+  "lastReadTime": "2026-03-07T14:46:25.989Z"
+}
